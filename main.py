@@ -10,6 +10,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import SGDClassifier
 
 import numpy
+import pandas as pd
 
 sys.path.insert(0, os.path.dirname(__file__))
 
@@ -20,9 +21,25 @@ loader = IsearLoader(data,target)
 dataset = loader.load_isear('isear.csv')
 
 text_data_set = dataset.get_freetext_content()
+
+isear_data = pd.DataFrame(text_data_set)
+
 target_set = dataset.get_target()
 target_chain = itertools.chain(*target_set)
 target_data = list(target_chain)
+
+isear_data_labels = pd.DataFrame(target_data)
+
+isear_final = pd.concat([isear_data, isear_data_labels], axis = 1)
+isear_final.columns = ['text', 'emotions']
+
+EMOT = ["JOY", "FEAR", "ANGER", "SADNESS", "DISGUST", "SHAME", "GUILT"]
+
+emo_map = {1: "joy", 2: "fear", 3: "anger", 4:"sadness", 5:"disgust", 6:"shame", 7:"guilt"}
+
+isear_final = isear_final.replace({"emotions": emo_map})
+isear_final.to_csv("isear_processed_emotions.csv", index=False)
+
 
 x_tr_data = text_data_set[:70]
 x_tst_data = text_data_set[70:]
